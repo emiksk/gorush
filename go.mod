@@ -40,3 +40,5 @@ require (
 	google.golang.org/grpc v1.21.1
 	gopkg.in/redis.v5 v5.2.9
 )
+
+replace github.com/sideshow/apns2 v0.19.0 => github.com/emiksk/apns2 v0.19.1

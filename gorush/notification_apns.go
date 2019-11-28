@@ -30,6 +30,7 @@ func InitAPNSClient() error {
 		var authKey *ecdsa.PrivateKey
 		var certificateKey tls.Certificate
 		var ext string
+		var client *apns2.Client
 
 		if PushConf.Ios.KeyPath != "" {
 			ext = filepath.Ext(PushConf.Ios.KeyPath)
@@ -84,16 +85,29 @@ func InitAPNSClient() error {
 				// TeamID from developer account (View Account -> Membership)
 				TeamID: PushConf.Ios.TeamID,
 			}
-			if PushConf.Ios.Production {
-				ApnsClient = apns2.NewTokenClient(token).Production()
+
+			if PushConf.Core.HTTPProxy != "" {
+				client = apns2.NewProxyTokenClient(token, PushConf.Core.HTTPProxy)
 			} else {
-				ApnsClient = apns2.NewTokenClient(token).Development()
+				client = apns2.NewTokenClient(token)
+			}
+
+			if PushConf.Ios.Production {
+				ApnsClient = client.Production()
+			} else {
+				ApnsClient = client.Development()
 			}
 		} else {
-			if PushConf.Ios.Production {
-				ApnsClient = apns2.NewClient(certificateKey).Production()
+			if PushConf.Core.HTTPProxy != "" {
+				client = apns2.NewProxyClient(certificateKey, PushConf.Core.HTTPProxy)
 			} else {
-				ApnsClient = apns2.NewClient(certificateKey).Development()
+				client = apns2.NewClient(certificateKey)
+			}
+
+			if PushConf.Ios.Production {
+				ApnsClient = client.Production()
+			} else {
+				ApnsClient = client.Development()
 			}
 		}
 	}
